@@ -45,15 +45,17 @@ int main(int argc, char * argv[]){
 
 
     filename = argv[1];                                 //Nombre del fichero
-    max = 0;                                //numero de ceros
+    max = 0;                                            //numero de ceros
     max--;
     int lineas = block_lines(bloque, filename);         //contar las lineas que tiene el bloque
     buff = malloc(lineas*MAX_LINE_LENGTH*sizeof(char));
 
+    //alocar memoria para cada hilo
     for(int i = 0; i<THREAD_NUMBER; i++){
         new_buff[i] = malloc(lineas*MAX_LINE_LENGTH*sizeof(char));
     }
     
+    //alocar memoria para el bloque con mas ceros
     max_new_buff = malloc(lineas*MAX_LINE_LENGTH*sizeof(char));
     copy_to_buff(bloque, filename, buff ,lineas);
     
