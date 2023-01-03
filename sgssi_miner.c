@@ -119,19 +119,6 @@ int main(int argc, char * argv[]){
     
 }
 
-/*
- * Función para printear el error.
- */
-void __error(int cod, char *s){
-    switch(cod){
-	case 0:
-	    printf("******** %s *********\n", s);
-	    break;
-	default:
-	    break;
-    }
-    exit(0);
-}
 
 void parse_hex(char *hex, int nonce_len){
     char *zeros = malloc((nonce_len-strlen(hex))*sizeof(char));
@@ -144,28 +131,15 @@ void parse_hex(char *hex, int nonce_len){
        
 }
 
-/*
- * Función para guardar un valor hexadecimal aleatorio en la variable hex
- */
-void random_hex(char hex[9], int n){
-    FILE * f = fopen("/dev/urandom", "rb");
-    fread(&n, sizeof(int), 1, f);
-    sprintf(hex, "%08x", n);
-    fclose(f);
-}
 
 /*
  * Función para copiar el contenido del bloque original al nuevo y añadir la linea con el numero hexadecimal
  */
 void copy_file(char *buff){
-    
-    
     //Añadir la ultima linea
     FILE *f=fopen("prueba.txt", "w+");
     fprintf(f, buff);
     fclose(f);
-
-
 }
 
 /*
@@ -210,13 +184,13 @@ int count_zeros(char hash[65]){
     int counter, i;
     counter = 0;
     if(hash[0] == '0'){
-	counter++;
-	for(i = 1; i < 65; i++){
-	    if(hash[i] == '0')
-		counter++;
-	    else
-		break;
-	}
+	    counter++;
+        for(i = 1; i < 65; i++){
+            if(hash[i] == '0')
+            counter++;
+            else
+            break;
+        }
     }
     return counter;
 }
