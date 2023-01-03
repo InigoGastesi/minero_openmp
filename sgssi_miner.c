@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -18,21 +17,20 @@
 int main(int argc, char * argv[]){
     
     //Comprobar los argumentos
-    if(argc != 3){
-	printf("ERROR: Bad argument!");
-	printf("\nUse: ./BTC_miner <file> <number>");
-	exit(0);
+    if(argc != 4){
+        printf("ERROR: Bad argument!");
+        printf("\nUse: ./minero <file> <number_of_hex> <code>");
+        exit(0);
     }
 
     //Declaración de variables
     FILE *bloque, *nuevo_bloque, *final_block;
     char *filename;
-    char new_filename[9] = "new_file";
-    printf("%s\n", new_filename);
-    char hex_num[THREAD_NUMBER][20], max_hex_num[20];
-    char hash1[THREAD_NUMBER][65], hash[THREAD_NUMBER][65], max_hash[65];
-    char code[9];
-    char nonces[THREAD_NUMBER][20];
+
+    char hex_num[THREAD_NUMBER][20], max_hex_num[20];//buffer que se va a usar para ir completanto el nonce en cada iteracion
+    char hash1[THREAD_NUMBER][65], hash[THREAD_NUMBER][65], max_hash[65];//hash del bloque
+    char code[9];//el codigo del alumno
+    char nonces[THREAD_NUMBER][20];//el mejor nonce obtenido en cada hilo
     int count = 0, find = 0, iter = 0, max;
     int n, nonce_len=atoi(argv[2]), tid;
     long i, number_of_iterations=pow(16,atoi(argv[2]));
@@ -42,17 +40,16 @@ int main(int argc, char * argv[]){
     
     time_t start, end;
     double dif;
-    //n = 0;
 
-    strcpy(code, " G293132");
+    sprintf(code, " %s", argv[3]);
+
 
     filename = argv[1];                                 //Nombre del fichero
     max = 0;                                //numero de ceros
     max--;
     int lineas = block_lines(bloque, filename);         //contar las lineas que tiene el bloque
     buff = malloc(lineas*MAX_LINE_LENGTH*sizeof(char));
-    //sprintf(new_filename, "new_%s", filename);          //guardar el nombre del nuevo fichero
-    //sprintf(final_filename, "new_%s", filename);        //guardar el nombre del nuevo fichero
+
     for(int i = 0; i<THREAD_NUMBER; i++){
         new_buff[i] = malloc(lineas*MAX_LINE_LENGTH*sizeof(char));
     }
@@ -72,34 +69,35 @@ int main(int argc, char * argv[]){
         tid = omp_get_thread_num();               
 
         //Hash del fichero
-        strcpy(new_buff[tid], buff);
-        sprintf(hex_num[tid],"%x", i);
-        parse_hex(hex_num[tid], nonce_len);
-        strcat(hex_num[tid], code);
-        strcat(new_buff[tid], hex_num[tid]);
-        sha256(new_buff[tid], hash1[tid]);
+        strcpy(new_buff[tid], buff);//copiar el bloque al hilo
+        sprintf(hex_num[tid],"%x", i);//guardar el numero hexadecimal del nonce en el hilo correspondiente
+        parse_hex(hex_num[tid], nonce_len);//añadir los 0's necesarios al numero hexadecimal para que tenga los digitos necesarios
+        strcat(hex_num[tid], code);//añadir el codigo del grupo o usuario al nonce
+        strcat(new_buff[tid], hex_num[tid]);//añadir el nonce completo al final del bloque
+        sha256(new_buff[tid], hash1[tid]);//calcular el sha256 del bloque
 
         //contar el numero de ceros
-        count = count_zeros(hash1[tid]);
+        count = count_zeros(hash1[tid]);//contar los 0's del hash obtenido
 
-        //si se encuentra un hash con mas o el mismo numero de ceros establecido se copia el resultado a un fichero
+        //si se encuentra un hash con mas o el mismo numero de ceros se guarda el nonce obtenido en nonces[]
         if(count > max){
             max = count;
             strcpy(nonces[tid], hex_num[tid]);
         }
     }
+
+    //una vez hemos visto todas las posibilidades, en cada hilo tenemos guardado cual ha sido el nonce que mas 0's nos ha dado
+    //comprobar el resultado de cada hilo y obtener el mejor. Esto se ejecuta en SERIE
     max = 0;
     for(int i = 0; i < THREAD_NUMBER; i++){        
-        //Hash del fichero
-        strcpy(new_buff[i], buff);
-        strcat(new_buff[i], nonces[i]);
-        printf("%s\n",nonces[i]);
-        sha256(new_buff[i], hash1[i]);
+        strcpy(new_buff[i], buff);//copiar el bloque sin el nonce
+        strcat(new_buff[i], nonces[i]);//añadir el nonce
+        sha256(new_buff[i], hash1[i]);//obtener el sha256 del bloque
 
         //contar el numero de ceros
-        count = count_zeros(hash1[i]);
+        count = count_zeros(hash1[i]);//contar los ceros
 
-        //si se encuentra un hash con mas o el mismo numero de ceros establecido se copia el resultado a un fichero
+        //si se encuentra un hash con mas o el mismo numero de ceros establecido se guarda el sha256 de dicho bloque el nonce y el bloque entero
         if(count > max){
             max = count;
             strcpy(max_hash, hash1[i]);
@@ -108,10 +106,10 @@ int main(int argc, char * argv[]){
         }
     }
     time(&end);
-    copy_file(max_new_buff);
+    copy_file(max_new_buff);//se guarda el bloque en un fichero
     dif = difftime(end, start);
 
-    printf("[*] Resumen: %s\n", max_hash);
+    printf("[*] Resumen: %s\n", max_hash);//printeamos el hash del mejor bloque
     printf("[OK] Minado con exito!\n	-Numero de ceros: %d\n	-Tiempo transcurrido: %1.1f s\n", max, dif);
 
 
@@ -119,6 +117,16 @@ int main(int argc, char * argv[]){
     
 }
 
+void __error(int cod, char *s){
+    switch(cod){
+	case 0:
+	    printf("******** %s *********\n", s);
+	    break;
+	default:
+	    break;
+    }
+    exit(0);
+}
 
 void parse_hex(char *hex, int nonce_len){
     char *zeros = malloc((nonce_len-strlen(hex))*sizeof(char));
@@ -137,7 +145,7 @@ void parse_hex(char *hex, int nonce_len){
  */
 void copy_file(char *buff){
     //Añadir la ultima linea
-    FILE *f=fopen("prueba.txt", "w+");
+    FILE *f=fopen("bloque_minado.txt", "w+");
     fprintf(f, buff);
     fclose(f);
 }
@@ -150,7 +158,7 @@ void copy_to_buff(FILE *f1, char *filename, char *buff, int lineas){
     char line[MAX_LINE_LENGTH];
     //Abrir el documento
     if((f1 = fopen(filename, "r")) == NULL){
-	__error(0, "No se ha encontrado el fichero 1");
+	    __error(0, "No se ha encontrado el fichero 1");
     }
 	
     //leer el contenido y guardarlo en buff
