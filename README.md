@@ -1,12 +1,12 @@
-#Minero Openmp
+# Minero Openmp
 
-##Requisitos
+## Requisitos
 
 -Tener la libreria de OpenMP
 -Tener instalado la libreria openssl
 -Usar linux
 
-##Insturcciones de uso
+## Insturcciones de uso
 Para compilar el programa:
 ```
 make
