@@ -2,9 +2,9 @@
 
 ## Requisitos
 
--Tener la libreria de OpenMP
--Tener instalado la libreria openssl
--Usar linux
+- Tener la libreria de OpenMP
+- Tener instalado la libreria openssl
+- Usar linux
 
 ## Insturcciones de uso
 Para compilar el programa:
