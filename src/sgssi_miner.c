@@ -8,8 +8,8 @@
 #include <time.h>
 #include <math.h>
 
-#include "sgssi_miner.h"
-#include "sha256calc.h"
+#include "../include/sgssi_miner.h"
+#include "../include/sha256calc.h"
 
 /*
  * Función principal
@@ -28,7 +28,7 @@ int main(int argc, char * argv[]){
     char *filename;
 
     char hex_num[THREAD_NUMBER][20], max_hex_num[20];//buffer que se va a usar para ir completanto el nonce en cada iteracion
-    char hash1[THREAD_NUMBER][65], hash[THREAD_NUMBER][65], max_hash[65];//hash del bloque
+    char hash1[THREAD_NUMBER][65], max_hash[65];//hash del bloque
     char code[9];//el codigo del alumno
     char nonces[THREAD_NUMBER][20];//el mejor nonce obtenido en cada hilo
     int count = 0, find = 0, iter = 0, max;
@@ -42,9 +42,8 @@ int main(int argc, char * argv[]){
     double dif;
 
     sprintf(code, " %s", argv[3]);
-
-
-    filename = argv[1];                                 //Nombre del fichero
+    filename = argv[1];                              //Nombre del fichero
+    
     max = 0;                                            //numero de ceros
     max--;
     int lineas = block_lines(bloque, filename);         //contar las lineas que tiene el bloque

@@ -1,2 +1,2 @@
 ehp:
-	gcc sgssi_miner.c sha256calc.c -o minero -lssl -lcrypto -lm -fopenmp
+	gcc src/sgssi_miner.c src/sha256calc.c -o minero -lssl -lcrypto -lm -fopenmp
