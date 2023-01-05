@@ -1,5 +1,7 @@
 #Minero Openmp
+
 ##Requisitos
+
 -Tener la libreria de OpenMP
 -Tener instalado la libreria openssl
 -Usar linux
